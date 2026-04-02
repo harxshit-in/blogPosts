@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "isVerified": { "type": "boolean" }
+      }
+    },
+    "Blog": {
+      "title": "Blog",
+      "description": "Blog post",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "excerpt": { "type": "string" },
+        "content": { "type": "string" },
+        "authorId": { "type": "string" },
+        "published": { "type": "boolean" }
+      }
+    },
+    "Recommendation": {
+      "title": "Recommendation",
+      "description": "Recommendation",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      }
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "Site banner",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "linkUrl": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/blogs/{blogId}": { "schema": "Blog", "description": "Blog posts" },
+    "/recommendations/{recId}": { "schema": "Recommendation", "description": "Recommendations" },
+    "/banners/{bannerId}": { "schema": "Banner", "description": "Site banners" }
+  }
+}

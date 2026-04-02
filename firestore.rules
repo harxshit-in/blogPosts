@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && request.auth.uid == 'xWpu2sdoN8SbBWtRTIBMUOOY0Ud2';
+    }
+    
+    function isVerifiedWriter() {
+      let user = get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return isAuthenticated() && user.role == 'writer' && user.isVerified == true;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      // Anyone can read user profiles (needed for author info)
+      allow read: if true;
+      
+      // Users can create their own profile on signup
+      allow create: if isOwner(userId) && request.resource.data.role == 'reader';
+      
+      // Users can update their own profile (but not their role/verification status)
+      allow update: if isOwner(userId) && 
+        request.resource.data.role == resource.data.role && 
+        request.resource.data.isVerified == resource.data.isVerified || 
+        isAdmin();
+        
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+
+    // Blogs Collection
+    match /blogs/{blogId} {
+      // Anyone can read published blogs
+      allow read: if resource.data.published == true || isOwner(resource.data.authorId) || isAdmin();
+      
+      // Only verified writers and admins can create blogs
+      allow create: if (isVerifiedWriter() && request.resource.data.authorId == request.auth.uid) || isAdmin();
+      
+      // Only the author or admin can update/delete blogs
+      allow update, delete: if isOwner(resource.data.authorId) || isAdmin();
+    }
+
+    // Recommendations Collection
+    match /recommendations/{recId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Banners Collection
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
